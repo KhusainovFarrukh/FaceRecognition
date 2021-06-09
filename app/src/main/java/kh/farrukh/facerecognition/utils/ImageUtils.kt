@@ -3,7 +3,6 @@ package kh.farrukh.facerecognition.utils
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.os.Environment
-import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.abs
@@ -27,11 +26,11 @@ object ImageUtils {
     fun saveBitmap(bitmap: Bitmap, filename: String) {
         val root =
             Environment.getExternalStorageDirectory().absolutePath + File.separator + "tensorflow"
-        Log.e("saveBitmap", "width:${bitmap.width}, height:${bitmap.height}, to:$root")
+//        Log.e("saveBitmap", "width:${bitmap.width}, height:${bitmap.height}, to:$root")
         val myDir = File(root)
-        if (!myDir.mkdirs()) {
-            Log.e("saveBitmap", "Make dir failed")
-        }
+//        if (!myDir.mkdirs()) {
+//            Log.e("saveBitmap", "Make dir failed")
+//        }
         val file = File(myDir, filename)
         if (file.exists()) {
             file.delete()
@@ -42,7 +41,7 @@ object ImageUtils {
             out.flush()
             out.close()
         } catch (e: Exception) {
-            Log.e("saveBitmap", "Exception: ${e.message}")
+//            Log.e("saveBitmap", "Exception: ${e.message}")
         }
     }
 
@@ -123,9 +122,9 @@ object ImageUtils {
     ): Matrix {
         val matrix = Matrix()
         if (applyRotation != 0) {
-            if (applyRotation % 90 != 0) {
-                Log.e("getTransformMatrix", "Rotation of $applyRotation % 90 != 0")
-            }
+//            if (applyRotation % 90 != 0) {
+//                Log.e("getTransformMatrix", "Rotation of $applyRotation % 90 != 0")
+//            }
 
             matrix.postTranslate(-srcWidth / 2.0f, -srcHeight / 2.0f)
             matrix.postRotate(applyRotation.toFloat())

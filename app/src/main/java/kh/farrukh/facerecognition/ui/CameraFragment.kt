@@ -15,9 +15,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
 import android.text.TextUtils
-import android.util.Log
 import android.util.Size
-import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.TextureView.SurfaceTextureListener
@@ -26,7 +24,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kh.farrukh.facerecognition.R
 import kh.farrukh.facerecognition.customviews.AutoFitTextureView
-import kh.farrukh.facerecognition.databinding.FragmentCameraBinding
 import kh.farrukh.facerecognition.utils.CompareSizesByArea
 import kh.farrukh.facerecognition.utils.ConnectionCallback
 import kh.farrukh.facerecognition.utils.ErrorDialog
@@ -77,23 +74,23 @@ class CameraFragment private constructor(
                     tooSmall.add(option)
                 }
             }
-            Log.e("chooseOptimalSize", "Desired size: $desiredSize, min: $minSize*$minSize")
-            Log.e("chooseOptimalSize", "Valid preview sizes: [${TextUtils.join(", ", bigEnough)}]")
-            Log.e(
-                "chooseOptimalSize",
-                "Rejected preview sizes: [${TextUtils.join(", ", tooSmall)}]"
-            )
+//            Log.e("chooseOptimalSize", "Desired size: $desiredSize, min: $minSize*$minSize")
+//            Log.e("chooseOptimalSize", "Valid preview sizes: [${TextUtils.join(", ", bigEnough)}]")
+//            Log.e(
+//                "chooseOptimalSize",
+//                "Rejected preview sizes: [${TextUtils.join(", ", tooSmall)}]"
+//            )
             if (exactSizeFound) {
-                Log.e("chooseOptimalSize", "Exact size match found")
+//                Log.e("chooseOptimalSize", "Exact size match found")
                 return desiredSize
             }
             return if (bigEnough.size > 0) {
                 val chosenSize =
                     Collections.min(bigEnough, CompareSizesByArea())!!
-                Log.e("chooseOptimalSize", "Chosen size: ${chosenSize.width}*${chosenSize.height}")
+//                Log.e("chooseOptimalSize", "Chosen size: ${chosenSize.width}*${chosenSize.height}")
                 chosenSize
             } else {
-                Log.e("chooseOptimalSize", "Couldn't find any suitable preview size")
+//                Log.e("chooseOptimalSize", "Couldn't find any suitable preview size")
                 choices[0]
             }
         }
@@ -169,18 +166,12 @@ class CameraFragment private constructor(
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-//        _binding = FragmentCameraBinding.inflate(layoutInflater)
         return inflater.inflate(layout, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         textureView = view.findViewById(R.id.texture_view)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-//        _binding = null
     }
 
     override fun onResume() {
@@ -222,7 +213,7 @@ class CameraFragment private constructor(
                 textureView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
             }
         } catch (e: CameraAccessException) {
-            Log.e("setUpCameraOptions", "Exception: ${e.message}")
+//            Log.e("setUpCameraOptions", "Exception: ${e.message}")
         } catch (e: NullPointerException) {
             ErrorDialog.newInstance(getString(R.string.camera_error))
                 .show(childFragmentManager, FRAGMENT_DIALOG)
@@ -242,7 +233,7 @@ class CameraFragment private constructor(
             }
             manager.openCamera(cameraId!!, stateCallback, backgroundHandler)
         } catch (e: CameraAccessException) {
-            Log.e("openCamera", "Exception: ${e.message}")
+//            Log.e("openCamera", "Exception: ${e.message}")
         } catch (e: InterruptedException) {
             throw RuntimeException("Interrupted while trying to lock camera opening.", e)
         }
@@ -283,7 +274,7 @@ class CameraFragment private constructor(
             backgroundThread = null
             backgroundHandler = null
         } catch (e: InterruptedException) {
-            Log.e("stopBackgroundThread", "Exception: ${e.message}")
+//            Log.e("stopBackgroundThread", "Exception: ${e.message}")
         }
     }
 
@@ -295,17 +286,16 @@ class CameraFragment private constructor(
             previewRequestBuilder =
                 cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
             previewRequestBuilder!!.addTarget(surface)
-            Log.e(
-                "createCameraPreview",
-                "Opening camera preview: ${previewSize!!.width}*${previewSize!!.height}"
-            )
+//            Log.e(
+//                "createCameraPreview",
+//                "Opening camera preview: ${previewSize!!.width}*${previewSize!!.height}"
+//            )
             previewReader = ImageReader.newInstance(
                 previewSize!!.width, previewSize!!.height, ImageFormat.YUV_420_888, 2
             )
             previewReader!!.setOnImageAvailableListener(imageListener, backgroundHandler)
             previewRequestBuilder!!.addTarget(previewReader!!.surface)
 
-//            cameraDevice!!.createCaptureSession(SessionConfiguration())
             cameraDevice!!.createCaptureSession(
                 listOf(surface, previewReader!!.surface),
                 object : CameraCaptureSession.StateCallback() {
@@ -328,7 +318,7 @@ class CameraFragment private constructor(
                                 previewRequest!!, captureCallback, backgroundHandler
                             )
                         } catch (e: CameraAccessException) {
-                            Log.e("onConfigured", "Exception: ${e.message}")
+//                            Log.e("onConfigured", "Exception: ${e.message}")
                         }
                     }
 
@@ -339,7 +329,7 @@ class CameraFragment private constructor(
                 null
             )
         } catch (e: CameraAccessException) {
-            Log.e("onConfigured", "Exception: ${e.message}")
+//            Log.e("onConfigured", "Exception: ${e.message}")
         }
     }
 

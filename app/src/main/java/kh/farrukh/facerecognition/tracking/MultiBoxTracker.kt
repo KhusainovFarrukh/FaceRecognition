@@ -6,7 +6,6 @@ import android.graphics.*
 import android.graphics.Paint.Cap
 import android.graphics.Paint.Join
 import android.text.TextUtils
-import android.util.Log
 import android.util.Pair
 import android.util.TypedValue
 import kh.farrukh.facerecognition.database.Recognition
@@ -97,7 +96,7 @@ class MultiBoxTracker(context: Context) {
 
     @Synchronized
     fun trackResults(results: List<Recognition>, timestamp: Long) {
-        Log.e("trackResults", "Processing ${results.size} results from $timestamp")
+//        Log.e("trackResults", "Processing ${results.size} results from $timestamp")
         processResults(results)
     }
 
@@ -150,20 +149,20 @@ class MultiBoxTracker(context: Context) {
             val detectionFrameRect = RectF(result.location)
             val detectionScreenRect = RectF()
             rgbFrameToScreen.mapRect(detectionScreenRect, detectionFrameRect)
-            Log.e(
-                "processResults",
-                "Result! Frame: ${result.location} mapped to screen: $detectionScreenRect"
-            )
+//            Log.e(
+//                "processResults",
+//                "Result! Frame: ${result.location} mapped to screen: $detectionScreenRect"
+//            )
             screenRects.add(Pair(result.distance, detectionScreenRect))
             if (detectionFrameRect.width() < MIN_SIZE || detectionFrameRect.height() < MIN_SIZE) {
-                Log.e("processResults", "Degenerate rectangle! $detectionFrameRect")
+//                Log.e("processResults", "Degenerate rectangle! $detectionFrameRect")
                 continue
             }
             rectsToTrack.add(Pair<Float, Recognition>(result.distance, result))
         }
         trackedObjects.clear()
         if (rectsToTrack.isEmpty()) {
-            Log.e("processResults", "Nothing to track, aborting")
+//            Log.e("processResults", "Nothing to track, aborting")
             return
         }
         for (potential in rectsToTrack) {

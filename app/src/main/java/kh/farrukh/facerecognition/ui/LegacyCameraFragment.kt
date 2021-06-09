@@ -6,7 +6,6 @@ import android.hardware.Camera.CameraInfo
 import android.hardware.Camera.PreviewCallback
 import android.os.Bundle
 import android.os.HandlerThread
-import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
 import android.view.TextureView.SurfaceTextureListener
@@ -21,6 +20,7 @@ import java.io.IOException
  *Created by farrukh_kh on 6/8/21 4:57 PM
  *kh.farrukh.facerecognition.ui
  **/
+//TODO migrate from binding to xml inflating
 class LegacyCameraFragment(
     private val imageListener: PreviewCallback,
     private val layout: Int,
@@ -132,11 +132,11 @@ class LegacyCameraFragment(
             backgroundThread!!.join()
             backgroundThread = null
         } catch (e: InterruptedException) {
-            Log.e("stopBgThread", "Exception: ${e.message}")
+//            Log.e("stopBgThread", "Exception: ${e.message}")
         }
     }
 
-    fun stopCamera() {
+    private fun stopCamera() {
         if (camera != null) {
             camera!!.stopPreview()
             camera!!.setPreviewCallback(null)

@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.RectF
-import android.os.Trace
-import android.util.Log
 import android.util.Pair
 import kh.farrukh.facerecognition.database.AppDatabase
 import kh.farrukh.facerecognition.database.Recognition
@@ -29,7 +27,6 @@ class TFLiteFaceRecognitionModel : SimilarityClassifier {
 
     companion object {
         const val OUTPUT_SIZE = 192
-        const val NUM_DETECTIONS = 1
         const val IMAGE_MEAN = 128.0f
         const val IMAGE_STD = 128.0f
         const val NUM_THREADS = 4
@@ -50,7 +47,7 @@ class TFLiteFaceRecognitionModel : SimilarityClassifier {
             val br = BufferedReader(InputStreamReader(labelsInput))
             var line: String?
             while (br.readLine().also { line = it } != null) {
-                Log.e("create", "$line")
+//                Log.e("create", "$line")
                 model.labels.add(line)
             }
             br.close()
@@ -61,8 +58,9 @@ class TFLiteFaceRecognitionModel : SimilarityClassifier {
                         assetManager,
                         modelFilename
                     ), Interpreter.Options().apply { setNumThreads(NUM_THREADS) }
+//                    ), Interpreter.Options()
+
                 )
-//            model.tfLite = Interpreter(loadModelFile(assetManager, modelFilename))
             } catch (e: Exception) {
                 throw RuntimeException(e)
             }
@@ -73,12 +71,6 @@ class TFLiteFaceRecognitionModel : SimilarityClassifier {
                 ByteBuffer.allocateDirect(1 * model.inputSize * model.inputSize * 3 * numBytesPerChannel)
             model.imgData.let { it?.order(ByteOrder.nativeOrder()) }
             model.intValues = IntArray(model.inputSize * model.inputSize)
-//        model.tfLite?.setNumThreads(NUM_THREADS)
-
-//        model.outputLocations = Array(1) { Array(NUM_DETECTIONS) { FloatArray(4) } }
-//        model.outputClasses = Array(1) { FloatArray(NUM_DETECTIONS) }
-//        model.outputScores = Array(1) { FloatArray(NUM_DETECTIONS) }
-//        model.numDetections = FloatArray(1)
             return model
         }
 
@@ -121,12 +113,11 @@ class TFLiteFaceRecognitionModel : SimilarityClassifier {
 
     override fun register(recognition: Recognition) {
         database!!.getFacesDao().insertFace(recognition)
-//        registered[name] = recognition
     }
 
     override fun recognizeImage(bitmap: Bitmap, getExtra: Boolean): List<Recognition?> {
-        Trace.beginSection("recognizeImage")
-        Trace.beginSection("preprocessBitmap")
+//        Trace.beginSection("recognizeImage")
+//        Trace.beginSection("preprocessBitmap")
         bitmap.getPixels(intValues, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
 
         imgData!!.rewind()
@@ -145,17 +136,17 @@ class TFLiteFaceRecognitionModel : SimilarityClassifier {
             }
         }
 
-        Trace.endSection()
-        Trace.beginSection("feed")
+//        Trace.endSection()
+//        Trace.beginSection("feed")
         val inputArray = arrayOf<Any>(imgData!!)
-        Trace.endSection()
+//        Trace.endSection()
         val outputMap: MutableMap<Int, Any> = HashMap()
         embeddings =
             Array(1) { FloatArray(OUTPUT_SIZE) }
         outputMap[0] = embeddings
-        Trace.beginSection("run")
+//        Trace.beginSection("run")
         tfLite.runForMultipleInputsOutputs(inputArray, outputMap)
-        Trace.endSection()
+//        Trace.endSection()
 
         var distance = Float.MAX_VALUE
         val id = 0
@@ -167,7 +158,7 @@ class TFLiteFaceRecognitionModel : SimilarityClassifier {
                 val name = nearest.first
                 label = name
                 distance = nearest.second
-                Log.e("findNearest", "nearest: $name - distance: $distance")
+//                Log.e("findNearest", "nearest: $name - distance: $distance")
             }
         }
 
@@ -184,7 +175,7 @@ class TFLiteFaceRecognitionModel : SimilarityClassifier {
         if (getExtra) {
             rec.extra = embeddings
         }
-        Trace.endSection()
+//        Trace.endSection()
         return recognitions
     }
 
@@ -196,8 +187,8 @@ class TFLiteFaceRecognitionModel : SimilarityClassifier {
     override fun close() {
     }
 
-    @Deprecated("Be aware!")
-    override fun setNumThreads(numThreads: Int) {
-        tfLite.setNumThreads(NUM_THREADS)
-    }
+//    @Deprecated("Be aware!")
+//    override fun setNumThreads(numThreads: Int) {
+//        tfLite.setNumThreads(NUM_THREADS)
+//    }
 }

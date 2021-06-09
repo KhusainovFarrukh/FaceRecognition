@@ -19,7 +19,5 @@ interface SimilarityClassifier {
 
     fun close()
 
-    fun setNumThreads(numThreads: Int)
-
-//  void setUseNNAPI(boolean isChecked);
+//    fun setNumThreads(numThreads: Int)
 }

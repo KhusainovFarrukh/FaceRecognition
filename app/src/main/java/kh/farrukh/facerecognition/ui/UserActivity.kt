@@ -6,7 +6,6 @@ import android.hardware.camera2.CameraCharacteristics
 import android.media.ImageReader.OnImageAvailableListener
 import android.os.Bundle
 import android.os.SystemClock
-import android.util.Log
 import android.util.Size
 import android.util.TypedValue
 import android.widget.EditText
@@ -76,7 +75,7 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
         faceDetector = FaceDetection.getClient(options)
     }
 
-    fun onAddClick() {
+    private fun onAddClick() {
         addPending = true
         Toast.makeText(this, "click", Toast.LENGTH_LONG).show();
     }
@@ -99,7 +98,7 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
             )
         } catch (e: IOException) {
             e.printStackTrace()
-            Log.e("onPreviewSizeChosen", "Exception initializing classifier")
+//            Log.e("onPreviewSizeChosen", "Exception initializing classifier")
             Toast.makeText(
                 applicationContext, "Classifier could not be initialized", Toast.LENGTH_SHORT
             ).show()
@@ -108,11 +107,11 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
         previewWidth = size!!.width
         previewHeight = size.height
         sensorOrientation = rotation - getScreenOrientation()
-        Log.e(
-            "onPreviewSizeChosen",
-            "Camera orientation relative to screen canvas: $sensorOrientation"
-        )
-        Log.e("onPreviewSizeChosen", "Initializing at size $previewWidth*$previewHeight")
+//        Log.e(
+//            "onPreviewSizeChosen",
+//            "Camera orientation relative to screen canvas: $sensorOrientation"
+//        )
+//        Log.e("onPreviewSizeChosen", "Initializing at size $previewWidth*$previewHeight")
         rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888)
         val targetW: Int
         val targetH: Int
@@ -164,7 +163,7 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
             return
         }
         computingDetection = true
-        Log.e("processImage", "Preparing image $currTimestamp for detection in bg thread.")
+//        Log.e("processImage", "Preparing image $currTimestamp for detection in bg thread.")
         rgbFrameBitmap!!.setPixels(
             getRgbBytes(),
             0,
@@ -208,7 +207,7 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
     }
 
     override fun setNumThreads(numThreads: Int) {
-        runInBackground { detector!!.setNumThreads(numThreads) }
+//        runInBackground { detector!!.setNumThreads(numThreads) }
     }
 
     private fun createTransform(
@@ -220,9 +219,9 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
     ): Matrix {
         val matrix = Matrix()
         if (applyRotation != 0) {
-            if (applyRotation % 90 != 0) {
-                Log.e("createTransform", "Rotation of $applyRotation % 90 != 0")
-            }
+//            if (applyRotation % 90 != 0) {
+//                Log.e("createTransform", "Rotation of $applyRotation % 90 != 0")
+//            }
             matrix.postTranslate(-srcWidth / 2.0f, -srcHeight / 2.0f)
             matrix.postRotate(applyRotation.toFloat())
         }
@@ -255,15 +254,13 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
         findViewById<OverlayView>(R.id.tracking_overlay_view).postInvalidate()
         computingDetection = false
         if (mappedRecognitions.isNotEmpty()) {
-            Log.e("updateResults", "Adding results")
+//            Log.e("updateResults", "Adding results")
             val rec: Recognition = mappedRecognitions[0]
             if (rec.extra != null) {
                 showAddFaceDialog(rec)
             }
         }
         runOnUiThread {
-//            showFrameInfo(previewWidth.toString() + "x" + previewHeight)
-//            showCropInfo(croppedBitmap!!.width.toString() + "x" + croppedBitmap!!.height)
             showInference(lastProcessingTimeMs.toString() + "ms")
         }
     }
@@ -297,8 +294,8 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
         val cvFace = Canvas(faceBmp!!)
         val saved = false
         for (face in faces) {
-            Log.e("onFacesDetected", "Face: $face")
-            Log.e("onFacesDetected", "Running detection on face $currTimestamp")
+//            Log.e("onFacesDetected", "Face: $face")
+//            Log.e("onFacesDetected", "Running detection on face $currTimestamp")
             val boundingBox = RectF(face.boundingBox)
             val goodConfidence = true
             if (goodConfidence) {
@@ -349,7 +346,6 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
                     } else {
                         flip.postScale(-1f, 1f, previewWidth / 2.0f, previewHeight / 2.0f)
                     }
-                    //flip.postScale(1, -1, targetW / 2.0f, targetH / 2.0f);
                     flip.mapRect(boundingBox)
                 }
                 val result = Recognition(
