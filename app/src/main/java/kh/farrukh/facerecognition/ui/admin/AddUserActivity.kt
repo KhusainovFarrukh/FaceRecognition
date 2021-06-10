@@ -1,9 +1,10 @@
-package kh.farrukh.facerecognition.ui
+package kh.farrukh.facerecognition.ui.admin
 
 import android.content.DialogInterface
 import android.graphics.*
 import android.hardware.camera2.CameraCharacteristics
-import android.media.ImageReader.OnImageAvailableListener
+import android.media.ImageReader
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Size
@@ -13,6 +14,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
@@ -22,15 +24,17 @@ import com.google.mlkit.vision.face.FaceDetectorOptions
 import kh.farrukh.facerecognition.R
 import kh.farrukh.facerecognition.customviews.OverlayView
 import kh.farrukh.facerecognition.database.Recognition
+import kh.farrukh.facerecognition.databinding.ActivityAddUserBinding
 import kh.farrukh.facerecognition.tflite.SimilarityClassifier
 import kh.farrukh.facerecognition.tflite.TFLiteFaceRecognitionModel
 import kh.farrukh.facerecognition.tracking.MultiBoxTracker
+import kh.farrukh.facerecognition.ui.CameraActivity
 import kh.farrukh.facerecognition.utils.BorderedText
 import kh.farrukh.facerecognition.utils.ImageUtils
 import java.io.IOException
 import java.util.*
 
-class UserActivity : CameraActivity(), OnImageAvailableListener {
+class AddUserActivity : CameraActivity(), ImageReader.OnImageAvailableListener {
 
     companion object {
         private const val TF_OD_API_INPUT_SIZE = 112
@@ -64,8 +68,10 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_add_user)
 
-//        findViewById<FloatingActionButton>(R.id.fab_add).setOnClickListener { onAddClick() }
+        findViewById<FloatingActionButton>(R.id.fab_take_picture).setOnClickListener { onAddClick() }
+        findViewById<FloatingActionButton>(R.id.fab_switch_cam).setOnClickListener { switchCamera() }
 
         val options = FaceDetectorOptions.Builder()
             .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
@@ -77,7 +83,8 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
 
     private fun onAddClick() {
         addPending = true
-        Toast.makeText(this, "click", Toast.LENGTH_LONG).show();
+        processImage()
+        Toast.makeText(this, "Detecting and calculating...", Toast.LENGTH_LONG).show();
     }
 
     override fun onPreviewSizeChosen(size: Size?, rotation: Int) {
@@ -154,44 +161,52 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
     }
 
     override fun processImage() {
-        ++timestamp
-        val currTimestamp = timestamp
-        findViewById<OverlayView>(R.id.tracking_overlay_view).postInvalidate()
+        if (addPending) {
+            ++timestamp
+            val currTimestamp = timestamp
+            findViewById<OverlayView>(R.id.tracking_overlay_view).postInvalidate()
 
-        if (computingDetection) {
-            readyForNextImage()
-            return
-        }
-        computingDetection = true
+            if (computingDetection) {
+                readyForNextImage()
+                return
+            }
+            computingDetection = true
 //        Log.e("processImage", "Preparing image $currTimestamp for detection in bg thread.")
-        rgbFrameBitmap!!.setPixels(
-            getRgbBytes(),
-            0,
-            previewWidth,
-            0,
-            0,
-            previewWidth,
-            previewHeight
-        )
-        readyForNextImage()
-        val canvas = Canvas(croppedBitmap!!)
-        canvas.drawBitmap(rgbFrameBitmap!!, frameToCropTransform!!, null)
-        if (SAVE_PREVIEW_BITMAP) {
-            ImageUtils.saveBitmap(croppedBitmap!!, "preview.png")
+            rgbFrameBitmap!!.setPixels(
+                getRgbBytes(),
+                0,
+                previewWidth,
+                0,
+                0,
+                previewWidth,
+                previewHeight
+            )
+            readyForNextImage()
+            val canvas = Canvas(croppedBitmap!!)
+            canvas.drawBitmap(rgbFrameBitmap!!, frameToCropTransform!!, null)
+            if (SAVE_PREVIEW_BITMAP) {
+                ImageUtils.saveBitmap(croppedBitmap!!, "preview.png")
+            }
+            val image = InputImage.fromBitmap(croppedBitmap!!, 0)
+            faceDetector!!
+                .process(image)
+                .addOnSuccessListener(OnSuccessListener { faces ->
+                    if (faces.isEmpty()) {
+                        updateResults(currTimestamp, LinkedList<Recognition>())
+                        addPending = false
+                        return@OnSuccessListener
+                    }
+                    try {
+                        runInBackground {
+                            onFacesDetected(currTimestamp, faces, addPending)
+                            addPending = false
+                        }
+                    } catch (e: Exception) {
+                        addPending = false
+                        Toast.makeText(this, "There isn`t any face", Toast.LENGTH_SHORT).show()
+                    }
+                })
         }
-        val image = InputImage.fromBitmap(croppedBitmap!!, 0)
-        faceDetector!!
-            .process(image)
-            .addOnSuccessListener(OnSuccessListener { faces ->
-                if (faces.isEmpty()) {
-                    updateResults(currTimestamp, LinkedList<Recognition>())
-                    return@OnSuccessListener
-                }
-                runInBackground {
-                    onFacesDetected(currTimestamp, faces, addPending)
-                    addPending = false
-                }
-            })
     }
 
     override fun getLayoutId(): Int {
@@ -237,20 +252,20 @@ class UserActivity : CameraActivity(), OnImageAvailableListener {
         val ivFace = dialogLayout.findViewById<ImageView>(R.id.iv_image)
         val etName = dialogLayout.findViewById<EditText>(R.id.et_name)
         ivFace.setImageBitmap(rec.crop)
-        builder.setPositiveButton("OK", DialogInterface.OnClickListener { dlg, i ->
+        builder.setView(dialogLayout)
+        val dlg = builder.show()
+        dialogLayout.findViewById<MaterialButton>(R.id.btn_ok).setOnClickListener {
             val name = etName.text.toString()
             if (name.isEmpty()) {
-                return@OnClickListener
+                return@setOnClickListener
             }
             detector!!.register(rec.copy(title = name))
             dlg.dismiss()
-        })
-        builder.setView(dialogLayout)
-        builder.show()
+        }
     }
 
     private fun updateResults(currTimestamp: Long, mappedRecognitions: List<Recognition>) {
-        tracker!!.trackResults(mappedRecognitions, currTimestamp)
+//        tracker!!.trackResults(mappedRecognitions, currTimestamp)
         findViewById<OverlayView>(R.id.tracking_overlay_view).postInvalidate()
         computingDetection = false
         if (mappedRecognitions.isNotEmpty()) {

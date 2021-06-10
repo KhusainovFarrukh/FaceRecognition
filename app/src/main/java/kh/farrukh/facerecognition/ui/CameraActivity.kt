@@ -71,7 +71,7 @@ abstract class CameraActivity : AppCompatActivity(), OnImageAvailableListener,
         findViewById<FloatingActionButton>(R.id.fab_switch_cam).setOnClickListener { switchCamera() }
     }
 
-    fun switchCamera() {
+    protected fun switchCamera() {
         useFacing = if (useFacing == CameraCharacteristics.LENS_FACING_FRONT) {
             CameraCharacteristics.LENS_FACING_BACK
         } else {

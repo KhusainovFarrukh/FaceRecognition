@@ -8,7 +8,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kh.farrukh.facerecognition.databinding.ActivityMainBinding
-import kh.farrukh.facerecognition.ui.AdminActivity
+import kh.farrukh.facerecognition.ui.admin.AdminActivity
 import kh.farrukh.facerecognition.ui.UserActivity
 
 class MainActivity : AppCompatActivity() {

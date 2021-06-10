@@ -14,8 +14,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FaceRecognition">
+        <activity android:name=".ui.admin.AddUserActivity"></activity>
         <activity
-            android:name=".ui.AdminActivity"
+            android:name=".ui.admin.AdminActivity"
             android:screenOrientation="portrait" />
         <activity android:name=".ui.UserActivity" />
         <activity android:name=".MainActivity">

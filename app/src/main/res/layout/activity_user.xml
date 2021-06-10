@@ -24,12 +24,12 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:tint="@android:color/white" />
 
-
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_add"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|top"
+            android:visibility="gone"
             android:layout_margin="16dp"
             android:src="@android:drawable/ic_input_add"
             app:backgroundTint="@color/main_color"

@@ -1,9 +1,6 @@
 package kh.farrukh.facerecognition.database
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 
 /**
  *Created by farrukh_kh on 6/9/21 3:30 PM
@@ -19,4 +16,7 @@ interface FacesDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertFaces(faces: List<Recognition>)
+
+    @Delete
+    fun deleteFace(face: Recognition)
 }
